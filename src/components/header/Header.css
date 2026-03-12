@@ -1,0 +1,22 @@
+header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  top: 0;
+  width: 100%;
+  position: sticky;
+  gap: 20px;
+  background-color: #f5f5f5;
+  font-family: open sans, sans-serif;
+}
+
+header h1 {
+  font-size: 60px;
+  color: #333;
+}
+
+header img {
+  width: 60px;
+  height: 60px;
+  border-radius: 8px;
+}

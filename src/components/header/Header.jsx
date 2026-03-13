@@ -1,10 +1,15 @@
 import "./Header.css"
+import { Link } from "react-router-dom"
+import logo from "../../assets/img/logo-mobilidade-df.jpg"
+
 
 function Header(){
   return (
     <header>
-      <img src="src\assets\img\logo-mobilidade-df.jpg" alt="Logo Mobilidade DF" />
-      <h1>Mobilidade DF</h1>
+        <img src={logo} alt="Logo Mobilidade DF" />
+        <Link to="/" className="titulo">
+            <h1>Mobilidade DF</h1>
+        </Link>
     </header>
   )
 }

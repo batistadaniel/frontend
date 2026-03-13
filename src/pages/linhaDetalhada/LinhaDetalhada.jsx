@@ -31,42 +31,42 @@ function LinhaDetalhada(){
 
     <div>
 
-      <h1>Linha {linha.numero}</h1>
+      <h1>Linha {linha.numero?.toString()}</h1>
 
-      <p><b>Nome:</b> {linha.nome}</p>
+      <p><b>Nome:</b> {linha.nome?.toString()}</p>
 
-      <p><b>Preço:</b> R$ {linha.preco.toFixed(2)}</p>
+      <p><b>Preço:</b> R$ {linha.preco?.toFixed(2)}</p>
 
-      <p><b>Tempo da API:</b> {linha.tempo_execucao}</p>
+      <p><b>Tempo da API:</b> {linha.tempo_execucao?.toString()}</p>
 
-      <p><b>Route ID:</b> {linha.route_id}</p>
+      <p><b>Route ID:</b> {linha.route_id?.toString()}</p>
 
 
       <h2>Viagens</h2>
 
       {linha.viagens.map((viagem)=>(
-        <div key={viagem.id_viagem}>
+        <div key={viagem.id_viagem?.toString()}>
 
-          <h3>{viagem.sentido}</h3>
+          <h3>{viagem.sentido?.toString()}</h3>
 
-          <p><b>Destino:</b> {viagem.destino}</p>
+          <p><b>Destino:</b> {viagem.destino?.toString()}</p>
 
           <h4>Veículos operando</h4>
 
           {viagem.veiculos_operando.map((v)=>(
-            <div key={v.prefixo}>
+            <div key={v.prefixo?.toString()}>
 
-              <p>Ônibus: {v.prefixo}</p>
+              <p>Ônibus: {v.prefixo?.toString()}</p>
 
-              <p>Status: {v.status}</p>
+              <p>Status: {v.status?.toString()}</p>
 
-              <p>Horário início: {v.horario_inicio}</p>
+              <p>Horário início: {v.horario_inicio?.toString()}</p>
 
-              <p>Última atualização: {v.ultima_atualizacao}</p>
+              <p>Última atualização: {v.ultima_atualizacao?.toString()}</p>
 
-              <p>Progresso: {v.progresso_percentual}%</p>
+              <p>Progresso: {v.progresso_percentual?.toString()}%</p>
 
-              <p>Atraso: {v.delay_formatado}</p>
+              <p>Diferenca: {v.delay_formatado?.toString()}</p>
 
               <p>Lat: {v.localizacao.lat}</p>
 

@@ -1,4 +1,4 @@
-import LinhaSearch from "../../components/LinhaSearch"
+import LinhaSearch from "../../components/LinhaSearch/LinhaSearch"
 import { useLinhas } from "../../hooks/useLinhas"
 
 function Linhas(){

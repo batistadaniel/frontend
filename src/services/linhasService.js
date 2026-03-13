@@ -10,10 +10,10 @@ export async function getLinhas(){
 
 }
 
-export async function getLinha(id){
+// export async function getLinha(id){
 
-  const response = await fetch(`${API_URL}/linha/${id}`)
+//   const response = await fetch(`${API_URL}/linha/${id}`)
 
-  return await response.json()
+//   return await response.json()
 
-}
+// }

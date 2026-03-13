@@ -1,8 +1,13 @@
 .content {
   display: grid;
-  flex: 1;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  width: 100%;
+  height: calc(100vh - 72px);
+  grid-template-columns: repeat(3, 300px);
   gap: 20px;
-  max-width: 1200px;
-  margin: 0 auto;
+  margin-top: -120px;
+
+  justify-content: center;
+  align-content: center;
 }
+
+

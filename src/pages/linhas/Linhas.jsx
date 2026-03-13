@@ -9,8 +9,6 @@ function Linhas(){
 
     <div>
 
-      <h2>Buscar linha</h2>
-
       <LinhaSearch linhas={linhas} />
 
     </div>

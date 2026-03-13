@@ -1,10 +1,14 @@
-import { useState } from "react"
+import { useState, useRef } from "react"
 import { useNavigate } from "react-router-dom"
+import "./LinhaSearch.css"
 
-function LinhaSearch({ linhas }){
+function LinhaSearch({ linhas }) {
 
-  const [busca,setBusca] = useState("")
+  const [busca, setBusca] = useState("")
+  const [indiceAtivo, setIndiceAtivo] = useState(-1)
+
   const navigate = useNavigate()
+  const itensRef = useRef([])
 
   function slug(texto) {
     return texto
@@ -17,22 +21,24 @@ function LinhaSearch({ linhas }){
   const termo = slug(busca)
 
   const filtradas = linhas
-  .filter((linha) =>
-    slug(linha?.nome || "").includes(termo) ||
-    slug(linha?.numero || "").includes(termo)
-  )
-  .sort((a, b) => {
+    .filter((linha) =>
+      slug(linha?.nome || "").includes(termo) ||
+      slug(linha?.numero || "").includes(termo)
+    )
+    .sort((a, b) => {
 
-    if (!a.numero && b.numero) return -1
-    if (a.numero && !b.numero) return 1
+      const prioridade = ["Ceilândia", "Samambaia"]
 
-    if (a.numero && b.numero) {
-      return a.numero.localeCompare(b.numero)
-    }
+      if (prioridade.includes(a.nome) && !prioridade.includes(b.nome)) return -1
+      if (!prioridade.includes(a.nome) && prioridade.includes(b.nome)) return 1
 
-    return a.nome.localeCompare(b.nome)
+      if (a.numero && b.numero) {
+        return a.numero.localeCompare(b.numero)
+      }
 
-  })
+      return a.nome.localeCompare(b.nome)
+
+    })
 
   function selecionar(linha) {
 
@@ -41,30 +47,81 @@ function LinhaSearch({ linhas }){
       : slug(linha.nome)
 
     navigate(`/linha/${identificador}`)
+  }
+
+  function teclado(e) {
+
+    if (e.key === "ArrowDown") {
+      e.preventDefault()
+
+      const novo = Math.min(indiceAtivo + 1, filtradas.length - 1)
+      setIndiceAtivo(novo)
+
+      itensRef.current[novo]?.scrollIntoView({ block: "nearest" })
+    }
+
+    if (e.key === "ArrowUp") {
+      e.preventDefault()
+
+      const novo = Math.max(indiceAtivo - 1, 0)
+      setIndiceAtivo(novo)
+
+      itensRef.current[novo]?.scrollIntoView({ block: "nearest" })
+    }
+
+    if (e.key === "Enter" && indiceAtivo >= 0) {
+      selecionar(filtradas[indiceAtivo])
+    }
 
   }
 
-  return(
+  return (
 
-    <div>
+    <div className="linha-search">
 
-      <input
-        placeholder="Digite a linha"
-        value={busca}
-        onChange={(e)=>setBusca(e.target.value)}
-      />
+      <div className="search-wrapper">
 
-      <div>
+        <input
+          className="search-input"
+          placeholder="Busque por sua linha"
+          value={busca}
+          onChange={(e) => {
+            setBusca(e.target.value)
+            setIndiceAtivo(-1)
+          }}
+          onKeyDown={teclado}
+        />
 
-        {filtradas.map((linha)=>(
+      </div>
+
+      <div className="lista-opcoes">
+
+        {filtradas.map((linha, index) => (
 
           <div
+            ref={(el) => itensRef.current[index] = el}
             key={linha.id}
-            onClick={()=>selecionar(linha)}
+            className={`card-opcao ${index === indiceAtivo ? "ativa" : ""}`}
+            onClick={() => selecionar(linha)}
           >
 
-            {linha.numero ? `${linha.numero} - ` : ""}
-            {linha.nome}
+            {linha.numero && (
+
+              <span
+                className="badge"
+                style={{ borderColor: linha.cor_operadora }}
+              >
+                {linha.numero}
+              </span>
+
+            )}
+
+            <span
+              className="nome-linha"
+              style={!linha.numero ? { color: linha.cor_operadora } : {}}
+            >
+              {linha.nome}
+            </span>
 
           </div>
 
@@ -75,7 +132,6 @@ function LinhaSearch({ linhas }){
     </div>
 
   )
-
 }
 
 export default LinhaSearch

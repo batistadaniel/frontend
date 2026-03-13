@@ -1,0 +1,106 @@
+.linha-search{
+  width:100%;
+  max-width:1000px;
+  margin:auto;
+  position:relative;
+}
+
+/* CONTAINER DO INPUT FIXO */
+
+.search-wrapper{
+  position:fixed;
+  top:100px; /* altura do seu header */
+  left:50%;
+  transform:translateX(-50%);
+  width:100%;
+  max-width:1000px;
+  z-index:100;
+}
+
+/* INPUT */
+
+.search-input{
+  width:100%;
+  padding:15px;
+  border-radius:10px;
+  border:1px solid #ccc;
+  background:#f1f1f1;
+  font-size:16px;
+  outline:none;
+}
+
+.search-input:focus{
+  border-color:#d4d4d4;
+  box-shadow:0 0 0 2px rgba(218, 225, 228, 0.3);
+}
+
+/* LISTA */
+
+.lista-opcoes{
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+
+  margin-top:80px; /* espaço para não ficar atrás do input */
+}
+
+/* CARD */
+
+.card-opcao{
+
+  display:flex;
+  align-items:center;
+  gap:15px;
+
+  padding:14px;
+
+  border-radius:12px;
+
+  background:#ffffff;
+  border:1px solid #e3e3e3;
+
+  cursor:pointer;
+
+  transition:0.2s;
+}
+
+.card-opcao:hover{
+
+  border-color:#38bdf8;
+  background:#f7fbff;
+
+}
+
+/* ATIVO */
+
+.card-opcao.ativa{
+
+  border-color:#38bdf8;
+  background:#eef7ff;
+
+}
+
+/* BADGE */
+
+.badge{
+
+  padding:4px 8px;
+  border-radius:6px;
+
+  border:3px solid;
+
+  font-weight:bold;
+  min-width:55px;
+  text-align:center;
+
+  background:white;
+
+}
+
+/* NOME */
+
+.nome-linha{
+
+  font-weight:700;
+  flex:1;
+}

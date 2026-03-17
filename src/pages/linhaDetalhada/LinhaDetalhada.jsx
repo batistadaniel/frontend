@@ -1,136 +1,170 @@
-import { useParams } from "react-router-dom"
+import { useParams, Link } from "react-router-dom"
 import { useEffect, useState } from "react"
+import "./LinhaDetalhada.css"
+import Loader from "../../components/Loader/Loader"
 
 function LinhaDetalhada(){
 
   const { id } = useParams()
-
   const [linha,setLinha] = useState(null)
+
+  const [modo, setModo] = useState("grade")
+  const [sentidoSelecionado, setSentidoSelecionado] = useState(0)
 
   useEffect(()=>{
 
     async function carregar(){
-
       const response = await fetch(`http://localhost:3000/linha/${id}`)
-
       const data = await response.json()
-
       setLinha(data)
-
     }
 
     carregar()
 
   },[id])
 
+  // ✅ loader corrigido
   if(!linha){
-    return <p>Carregando...</p>
+    return <Loader />
+  }
+
+  const viagem = linha.grade_horaria[sentidoSelecionado]
+
+  const viagemInfo = linha.viagens.find(
+    v => v.sentido === viagem.sentido
+  )
+
+  const itinerario = linha.itinerarios.find(
+    it => it.sentido === viagem.sentido
+  )
+
+  const embarque = itinerario?.paradas[0]?.nome
+  const desembarque = itinerario?.paradas[itinerario.paradas.length - 1]?.nome
+
+  // ✅ remover "-" apenas para metrô específico
+  function formatarNome(nome){
+    if(!nome) return ""
+
+    if(
+      nome.toLowerCase().includes("ceilandia") ||
+      nome.toLowerCase().includes("samambaia")
+    ){
+      return nome.replace("-", "").trim()
+    }
+
+    return nome
   }
 
   return (
 
-    <div>
+    <div className="linha-container">
 
-      <h1>Linha {linha.numero?.toString()}</h1>
+      {/* TOPO */}
+      <div className="linha-topo">
+        <h1>
+          {linha.numero} {formatarNome(linha.nome)}
+        </h1>
 
-      <p><b>Nome:</b> {linha.nome?.toString()}</p>
+        <Link to="/linhas" className="btn-mudar">
+          Mudar linha
+        </Link>
+      </div>
 
-      <p><b>Preço:</b> R$ {linha.preco?.toFixed(2)}</p>
+      {/* ABAS */}
+      <div className="abas">
+        <div className="aba ativa">Horários</div>
+        <div className="aba">Mapa</div>
+      </div>
 
-      <p><b>Tempo da API:</b> {linha.tempo_execucao?.toString()}</p>
+      {/* SELEÇÃO */}
+      <div className="selecoes">
 
-      <p><b>Route ID:</b> {linha.route_id?.toString()}</p>
+        <div className="linha-select">
+          <span>Selecione um itinerário:</span>
 
-
-      <h2>Viagens</h2>
-
-      {linha.viagens.map((viagem)=>(
-        <div key={viagem.id_viagem?.toString()}>
-
-          <h3>{viagem.sentido?.toString()}</h3>
-
-          <p><b>Destino:</b> {viagem.destino?.toString()}</p>
-
-          <h4>Veículos operando</h4>
-
-          {viagem.veiculos_operando.map((v)=>(
-            <div key={v.prefixo?.toString()}>
-
-              <p>Ônibus: {v.prefixo?.toString()}</p>
-
-              <p>Status: {v.status?.toString()}</p>
-
-              <p>Horário início: {v.horario_inicio?.toString()}</p>
-
-              <p>Última atualização: {v.ultima_atualizacao?.toString()}</p>
-
-              <p>Progresso: {v.progresso_percentual?.toString()}%</p>
-
-              <p>Diferenca: {v.delay_formatado?.toString()}</p>
-
-              <p>Lat: {v.localizacao.lat}</p>
-
-              <p>Lng: {v.localizacao.lng}</p>
-
-              <hr/>
-
-            </div>
-          ))}
-
+          <select
+            value={sentidoSelecionado}
+            onChange={(e)=>setSentidoSelecionado(Number(e.target.value))}
+            disabled={linha.grade_horaria.length === 1}
+          >
+            {linha.grade_horaria.map((g, index)=>(
+              <option key={index} value={index}>
+                {/* ✅ padronização aqui */}
+                {formatarNome(g.sentido)}
+              </option>
+            ))}
+          </select>
         </div>
-      ))}
 
-
-      <h2>Grade Horária</h2>
-
-      {linha.grade_horaria.map((g)=>(
-        <div key={g.sentido}>
-
-          <h3>{g.sentido}</h3>
-
-          <p>Ponto de partida: {g.ponto_partida}</p>
-
-          {g.servicos.map((s)=>(
-            <div key={s.dias}>
-
-              <p><b>{s.dias}</b></p>
-
-              <p>
-                {s.partidas.join(" | ")}
-              </p>
-
-            </div>
-          ))}
-
+        <div className="destino">
+          <b>Destino:</b> {formatarNome(viagemInfo?.destino)}
         </div>
-      ))}
 
-
-      <h2>Itinerário</h2>
-
-      {linha.itinerarios.map((it)=>(
-        <div key={it.id_viagem}>
-
-          <h3>{it.sentido}</h3>
-
-          {it.paradas.map((p)=>(
-            <div key={p.id}>
-
-              <p>{p.id} - {p.nome}</p>
-
-              <p>Lat: {p.coordenadas.lat}</p>
-
-              <p>Lng: {p.coordenadas.lng}</p>
-
-              <p>Chegada prevista: {p.previsao_chegada_segundos}s</p>
-
-              <hr/>
-
-            </div>
-          ))}
-
+        <div className="locais">
+          <p><b>Local de embarque:</b> {formatarNome(embarque)}</p>
+          <p><b>Local de desembarque:</b> {formatarNome(desembarque)}</p>
         </div>
-      ))}
+
+      </div>
+
+      {/* MODO */}
+      <div className="modo">
+        <span 
+          className={modo === "grade" ? "ativo" : ""}
+          onClick={()=>setModo("grade")}
+        >
+          Grade
+        </span>
+
+        <span 
+          className={modo === "lista" ? "ativo" : ""}
+          onClick={()=>setModo("lista")}
+        >
+          Tabela
+        </span>
+      </div>
+
+      {/* HORÁRIOS */}
+      <div className="horarios">
+
+        {viagem.servicos.map((s, i)=>(
+          <div key={i} className="bloco-servico">
+
+            <p className="dias">{s.dias}</p>
+
+            {modo === "grade" ? (
+              <div className="grade">
+                {s.partidas.map((h, index)=>(
+                  <div key={index} className="card-horario">
+                    {h}
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <table className="tabela">
+                <thead>
+                  <tr>
+                    <th>Horário</th>
+                    <th>Partida</th>
+                    <th>Destino</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {s.partidas.map((h, index)=>(
+                    <tr key={index}>
+                      <td>{h}</td>
+                      <td>{formatarNome(embarque)}</td>
+                      <td>{formatarNome(desembarque)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
+
+          </div>
+        ))}
+
+      </div>
 
     </div>
 

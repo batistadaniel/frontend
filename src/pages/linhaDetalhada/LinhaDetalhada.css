@@ -1,0 +1,173 @@
+/* CONTAINER */
+.linha-container {
+  max-width: 1200px;
+  margin: auto;
+  padding: 30px;
+}
+
+/* TOPO FULL WIDTH */
+.linha-topo {
+  width: 100vw;
+  margin-left: calc(-50vw + 50%);
+  border-top: 3px solid #000;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 60px;
+  padding: 10px 100px;
+}
+
+.linha-topo h1 {
+  font-size: 22px;
+  font-weight: bold;
+}
+
+/* BOTÃO */
+.btn-mudar {
+  background: #000;
+  color: #fff;
+  padding: 8px 14px;
+  border-radius: 8px;
+  text-decoration: none;
+}
+
+/* FAIXA PRETA FULL */
+.abas {
+  width: 100vw;
+  margin-left: calc(-50vw + 50%);
+  display: flex;
+  background: #000;
+  color: #fff;
+  margin-top: 10px;
+}
+
+.aba {
+  flex: 1;
+  text-align: center;
+  padding: 12px;
+  cursor: pointer;
+}
+
+.aba.ativa {
+  border-bottom: 3px solid #fff;
+}
+
+/* SELEÇÕES */
+.selecoes {
+  margin-top: 20px;
+  max-width: 700px;
+}
+
+/* SELECT */
+.linha-select {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 15px;
+}
+
+.linha-select span {
+  font-weight: 600;
+  font-size: 14px;
+  color: #444;
+}
+
+.linha-select select {
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid #ddd;
+  background: #f8f8f8;
+  font-size: 14px;
+  outline: none;
+  transition: 0.2s;
+}
+
+.linha-select select:hover {
+  border-color: #aaa;
+}
+
+.linha-select select:focus {
+  border-color: #000;
+  background: #fff;
+}
+
+/* DESTINO + LOCAIS */
+.destino {
+  margin-top: 10px;
+  font-size: 15px;
+}
+
+.locais {
+  margin-top: 10px;
+  line-height: 1.6;
+  font-size: 14px;
+  color: #333;
+}
+
+/* MODO */
+.modo {
+  margin-top: 25px;
+  display: flex;
+  gap: 15px;
+}
+
+.modo span {
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.modo .ativo {
+  font-weight: bold;
+  border-bottom: 2px solid #000;
+}
+
+/* HORÁRIOS */
+.horarios {
+  margin-top: 25px;
+}
+
+/* ESPAÇO ENTRE BLOCOS (segunda, sábado, etc) */
+.bloco-servico {
+  margin-bottom: 30px;
+}
+
+.dias {
+  margin-bottom: 12px;
+  font-weight: bold;
+  color: #444;
+}
+
+/* GRADE */
+.grade {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.card-horario {
+  background: #f1f1f1;
+  padding: 15px;
+  border-radius: 10px;
+  border: 1px solid #ddd;
+  width: 80px;
+  text-align: center;
+  font-weight: bold;
+}
+
+/* TABELA */
+.tabela {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.tabela th {
+  text-align: left;
+  padding: 10px;
+  background: #e4e4e4; /* mais escuro */
+  font-weight: 600;
+}
+
+.tabela td {
+  padding: 10px;
+  border-bottom: 1px solid #ddd;
+}

@@ -5,7 +5,7 @@
   padding: 30px;
 }
 
-/* TOPO FULL WIDTH */
+/* TOPO */
 .linha-topo {
   width: 100vw;
   margin-left: calc(-50vw + 50%);
@@ -20,6 +20,9 @@
 .linha-topo h1 {
   font-size: 22px;
   font-weight: bold;
+  color: #fff;
+  padding: 8px 14px;
+  border-radius: 8px;
 }
 
 /* BOTÃO */
@@ -31,7 +34,7 @@
   text-decoration: none;
 }
 
-/* FAIXA PRETA FULL */
+/* ABAS */
 .abas {
   width: 100vw;
   margin-left: calc(-50vw + 50%);
@@ -45,7 +48,6 @@
   flex: 1;
   text-align: center;
   padding: 12px;
-  cursor: pointer;
 }
 
 .aba.ativa {
@@ -58,62 +60,132 @@
   max-width: 700px;
 }
 
-/* SELECT */
+/* LABEL + DROPDOWN */
 .linha-select {
   display: flex;
-  flex-direction: column;
-  gap: 6px;
+  align-items: center;
+  gap: 12px;
   margin-bottom: 15px;
 }
 
-.linha-select span {
-  font-weight: 600;
-  font-size: 14px;
-  color: #444;
+/* DROPDOWN */
+.custom-dropdown {
+  position: relative;
+  width: 220px;
 }
 
-.linha-select select {
-  padding: 10px 12px;
+/* DESABILITADO */
+.custom-dropdown.disabled summary {
+  background: #eee;
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+/* SUMMARY */
+.custom-dropdown summary {
+  list-style: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+  background: #f8f8f8;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.custom-dropdown summary::-webkit-details-marker {
+  display: none;
+}
+
+/* SETA */
+.main-chevron {
+  width: 8px;
+  height: 8px;
+  border-right: 2px solid #333;
+  border-bottom: 2px solid #333;
+  transform: rotate(45deg);
+  transition: 0.3s;
+}
+
+details[open] .main-chevron {
+  transform: rotate(-135deg);
+}
+
+/* LISTA */
+.options-list {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  right: 0;
+  background: #fff;
   border-radius: 10px;
   border: 1px solid #ddd;
-  background: #f8f8f8;
-  font-size: 14px;
-  outline: none;
+  overflow: hidden;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+  z-index: 10;
+}
+
+/* OPTION */
+.option {
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
   transition: 0.2s;
 }
 
-.linha-select select:hover {
-  border-color: #aaa;
+.option:hover {
+  background: #f1f5f9;
 }
 
-.linha-select select:focus {
-  border-color: #000;
-  background: #fff;
+.option.selected {
+  background: #e0e7ff;
+  color: #000000;
+  font-weight: bold;
 }
 
-/* DESTINO + LOCAIS */
-.destino {
+/* ICONES */
+.chevron-icon {
+  width: 6px;
+  height: 6px;
+  border-right: 2px solid currentColor;
+  border-bottom: 2px solid currentColor;
+}
+
+.up {
+  transform: rotate(-135deg);
+}
+
+.down {
+  transform: rotate(45deg);
+}
+
+/* DESTINO */
+.destino, .preco {
   margin-top: 10px;
-  font-size: 15px;
 }
 
+/* LOCAIS */
 .locais {
   margin-top: 10px;
   line-height: 1.6;
-  font-size: 14px;
-  color: #333;
 }
 
 /* MODO */
 .modo {
   margin-top: 25px;
+  margin-left: 50px;
   display: flex;
   gap: 15px;
-}
-
-.modo span {
-  cursor: pointer;
-  font-size: 14px;
+  & span {
+    padding: 8px 14px;
+    border-bottom: 2px solid transparent;
+    transition: 0.2s;
+    cursor: pointer;
+  }
 }
 
 .modo .ativo {
@@ -126,7 +198,6 @@
   margin-top: 25px;
 }
 
-/* ESPAÇO ENTRE BLOCOS (segunda, sábado, etc) */
 .bloco-servico {
   margin-bottom: 30px;
 }
@@ -134,7 +205,6 @@
 .dias {
   margin-bottom: 12px;
   font-weight: bold;
-  color: #444;
 }
 
 /* GRADE */
@@ -152,6 +222,7 @@
   width: 80px;
   text-align: center;
   font-weight: bold;
+  cursor: pointer;
 }
 
 /* TABELA */
@@ -161,13 +232,30 @@
 }
 
 .tabela th {
-  text-align: left;
   padding: 10px;
-  background: #e4e4e4; /* mais escuro */
-  font-weight: 600;
+  background: #e4e4e4;
+  text-align: start;
 }
 
 .tabela td {
   padding: 10px;
   border-bottom: 1px solid #ddd;
+  cursor: pointer;
+}
+
+/* ITINERÁRIO */
+.itinerario-tabela th {
+  background: #e4e4e4;
+}
+
+/* coluna pequena */
+.col-numero {
+  width: 60px;
+  text-align: center;
+  font-weight: bold;
+}
+
+/* zebra leve (fica bonito demais 👇) */
+.itinerario-tabela tbody tr:nth-child(even) {
+  background: #f9f9f9;
 }

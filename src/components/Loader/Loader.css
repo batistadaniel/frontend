@@ -9,10 +9,10 @@
 .spinner {
   width: 80px;
   height: 80px;
-  border: 4px solid #ccc;
-  border-top: 4px solid #386a29;
+  border: 10px solid #ccc;
+  border-top: 10px solid #386a29;
   border-radius: 50%;
-  animation: girar .9s linear infinite;
+  animation: girar 1s linear infinite;
 }
 
 @keyframes girar {

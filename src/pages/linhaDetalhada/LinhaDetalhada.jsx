@@ -1,5 +1,5 @@
 import { useParams, Link } from "react-router-dom"
-import { useEffect, useState } from "react"
+import { useEffect, useState, useRef } from "react"
 import "./LinhaDetalhada.css"
 import Loader from "../../components/Loader/Loader"
 
@@ -10,6 +10,10 @@ function LinhaDetalhada(){
 
   const [modo, setModo] = useState("grade")
   const [sentidoSelecionado, setSentidoSelecionado] = useState(0)
+
+  const [horarioSelecionado, setHorarioSelecionado] = useState(null)
+
+  const dropdownRef = useRef(null)
 
   useEffect(()=>{
 
@@ -23,7 +27,24 @@ function LinhaDetalhada(){
 
   },[id])
 
-  // ✅ loader corrigido
+  // fechar ao clicar fora
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target)
+      ) {
+        dropdownRef.current.removeAttribute("open")
+      }
+    }
+
+    document.addEventListener("mousedown", handleClickOutside)
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside)
+    }
+  }, [])
+
   if(!linha){
     return <Loader />
   }
@@ -41,7 +62,6 @@ function LinhaDetalhada(){
   const embarque = itinerario?.paradas[0]?.nome
   const desembarque = itinerario?.paradas[itinerario.paradas.length - 1]?.nome
 
-  // ✅ remover "-" apenas para metrô específico
   function formatarNome(nome){
     if(!nome) return ""
 
@@ -55,14 +75,41 @@ function LinhaDetalhada(){
     return nome
   }
 
+  // 🔥 calcular previsão
+  function calcularHorarioPrevisto(horario, segundos){
+    if(!horario) return ""
+
+    const [h, m] = horario.split(":").map(Number)
+
+    const data = new Date()
+    data.setHours(h)
+    data.setMinutes(m)
+    data.setSeconds(0)
+
+    data.setSeconds(data.getSeconds() + segundos)
+
+    const hh = String(data.getHours()).padStart(2, "0")
+    const mm = String(data.getMinutes()).padStart(2, "0")
+
+    return `${hh}:${mm}`
+  }
+
   return (
 
     <div className="linha-container">
 
       {/* TOPO */}
       <div className="linha-topo">
-        <h1>
-          {linha.numero} {formatarNome(linha.nome)}
+        <h1
+          style={{
+            backgroundColor: linha.cor_operadora,
+            color: linha.cor_operadora === "#bbff00" || linha.cor_operadora === "#ffd200" ? "#000" : "#fff"
+          }}
+        >
+          {linha.numero && linha.nome
+            ? `${linha.numero} - ${formatarNome(linha.nome)}`
+            : linha.numero
+          }
         </h1>
 
         <Link to="/linhas" className="btn-mudar">
@@ -82,22 +129,47 @@ function LinhaDetalhada(){
         <div className="linha-select">
           <span>Selecione um itinerário:</span>
 
-          <select
-            value={sentidoSelecionado}
-            onChange={(e)=>setSentidoSelecionado(Number(e.target.value))}
-            disabled={linha.grade_horaria.length === 1}
+          <details 
+            ref={dropdownRef}
+            className={`custom-dropdown ${linha.grade_horaria.length === 1 ? "disabled" : ""}`}
+            onClick={(e) => {
+              if (linha.grade_horaria.length === 1) {
+                e.preventDefault()
+              }
+            }}
           >
-            {linha.grade_horaria.map((g, index)=>(
-              <option key={index} value={index}>
-                {/* ✅ padronização aqui */}
-                {formatarNome(g.sentido)}
-              </option>
-            ))}
-          </select>
+            <summary>
+              <span>{formatarNome(viagem.sentido)}</span>
+              <div className="main-chevron"></div>
+            </summary>
+
+            <div className="options-list">
+              {linha.grade_horaria.map((g, index)=>(
+                <div
+                  key={index}
+                  className={`option ${index === sentidoSelecionado ? "selected" : ""}`}
+                  onClick={(e) => {
+                    setSentidoSelecionado(index)
+                    setHorarioSelecionado(null) // 🔥 limpa previsão
+                    e.currentTarget.closest("details").removeAttribute("open")
+                  }}
+                >
+                  <span>{formatarNome(g.sentido)}</span>
+
+                  <span className={`chevron-icon ${index === sentidoSelecionado ? "up" : "down"}`}></span>
+                </div>
+              ))}
+            </div>
+          </details>
+
         </div>
 
         <div className="destino">
           <b>Destino:</b> {formatarNome(viagemInfo?.destino)}
+        </div>
+
+        <div className="preco">
+          <b>Preço:</b> {linha?.preco ? `R$ ${linha.preco.toFixed(2)}` : "Não disponível"}
         </div>
 
         <div className="locais">
@@ -111,23 +183,67 @@ function LinhaDetalhada(){
       <div className="modo">
         <span 
           className={modo === "grade" ? "ativo" : ""}
-          onClick={()=>setModo("grade")}
+          onClick={()=>{
+            setModo("grade")
+            setHorarioSelecionado(null)
+          }}
         >
           Grade
         </span>
 
         <span 
           className={modo === "lista" ? "ativo" : ""}
-          onClick={()=>setModo("lista")}
+          onClick={()=>{
+            setModo("lista")
+            setHorarioSelecionado(null)
+          }}
         >
           Tabela
         </span>
+
+        <span 
+          className={modo === "itinerario" ? "ativo" : ""}
+          onClick={()=>setModo("itinerario")}
+        >
+          Itinerário
+        </span>
       </div>
 
-      {/* HORÁRIOS */}
+      {/* CONTEÚDO */}
       <div className="horarios">
 
-        {viagem.servicos.map((s, i)=>(
+        {/* ITINERÁRIO */}
+        {modo === "itinerario" && itinerario && (
+          <table className="tabela itinerario-tabela">
+            <thead>
+              <tr>
+                <th>Sequencial:</th>
+                <th>Ponto de Parada:</th>
+                {horarioSelecionado && <th>Previsto: {horarioSelecionado}</th>}
+              </tr>
+            </thead>
+            <tbody>
+              {itinerario.paradas.map((p, index)=>(
+                <tr key={p.id}>
+                  <td className="col-numero">{index + 1}</td>
+                  <td>{formatarNome(p.nome)}</td>
+
+                  {horarioSelecionado && (
+                    <td>
+                      {calcularHorarioPrevisto(
+                        horarioSelecionado,
+                        p.previsao_chegada_segundos
+                      )}
+                    </td>
+                  )}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
+
+        {/* HORÁRIOS */}
+        {modo !== "itinerario" && viagem.servicos.map((s, i)=>(
           <div key={i} className="bloco-servico">
 
             <p className="dias">{s.dias}</p>
@@ -135,7 +251,14 @@ function LinhaDetalhada(){
             {modo === "grade" ? (
               <div className="grade">
                 {s.partidas.map((h, index)=>(
-                  <div key={index} className="card-horario">
+                  <div 
+                    key={index} 
+                    className="card-horario"
+                    onClick={()=>{
+                      setHorarioSelecionado(h)
+                      setModo("itinerario")
+                    }}
+                  >
                     {h}
                   </div>
                 ))}
@@ -144,14 +267,20 @@ function LinhaDetalhada(){
               <table className="tabela">
                 <thead>
                   <tr>
-                    <th>Horário</th>
-                    <th>Partida</th>
-                    <th>Destino</th>
+                    <th>Horário:</th>
+                    <th>Partida:</th>
+                    <th>Destino:</th>
                   </tr>
                 </thead>
                 <tbody>
                   {s.partidas.map((h, index)=>(
-                    <tr key={index}>
+                    <tr 
+                      key={index}
+                      onClick={()=>{
+                        setHorarioSelecionado(h)
+                        setModo("itinerario")
+                      }}
+                    >
                       <td>{h}</td>
                       <td>{formatarNome(embarque)}</td>
                       <td>{formatarNome(desembarque)}</td>

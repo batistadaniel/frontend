@@ -164,7 +164,7 @@ details[open] .main-chevron {
 }
 
 /* DESTINO */
-.destino, .preco {
+.destino, .preco, .duracao {
   margin-top: 10px;
 }
 
@@ -253,6 +253,13 @@ details[open] .main-chevron {
   width: 60px;
   text-align: center;
   font-weight: bold;
+}
+
+.col-meio {
+  width: 700px;
+  /* text-align: center; */
+  /* font-weight: bold; */
+  /* transform: translate(-50px, 0px); */
 }
 
 /* zebra leve (fica bonito demais 👇) */

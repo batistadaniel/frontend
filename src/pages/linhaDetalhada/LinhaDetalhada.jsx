@@ -61,6 +61,7 @@ function LinhaDetalhada(){
 
   const embarque = itinerario?.paradas[0]?.nome
   const desembarque = itinerario?.paradas[itinerario.paradas.length - 1]?.nome
+  const duracaoTotalSegundos = itinerario?.paradas?.[itinerario.paradas.length - 1]?.previsao_chegada_segundos
 
   function formatarNome(nome){
     if(!nome) return ""
@@ -73,6 +74,20 @@ function LinhaDetalhada(){
     }
 
     return nome
+  }
+
+  function calcularDuracaoViagem(segundos) {
+    if (!segundos && segundos !== 0) return ""
+
+    const minutosTotais = Math.floor(segundos / 60)
+    const horas = Math.floor(minutosTotais / 60)
+    const minutosRestantes = minutosTotais % 60
+
+    if (horas > 0) {
+      return `${horas}h ${minutosRestantes} min`
+    } else {
+      return `${minutosTotais} min`
+    }
   }
 
   // 🔥 calcular previsão
@@ -93,7 +108,6 @@ function LinhaDetalhada(){
 
     return `${hh}:${mm}`
   }
-
   return (
 
     <div className="linha-container">
@@ -172,6 +186,14 @@ function LinhaDetalhada(){
           <b>Preço:</b> {linha?.preco ? `R$ ${linha.preco.toFixed(2)}` : "Não disponível"}
         </div>
 
+        <div className="duracao">
+          <b>Duração prevista:</b> {
+            duracaoTotalSegundos != null
+              ? calcularDuracaoViagem(duracaoTotalSegundos)
+              : "Não disponível"
+          }
+        </div>
+
         <div className="locais">
           <p><b>Local de embarque:</b> {formatarNome(embarque)}</p>
           <p><b>Local de desembarque:</b> {formatarNome(desembarque)}</p>
@@ -218,7 +240,7 @@ function LinhaDetalhada(){
             <thead>
               <tr>
                 <th>Sequencial:</th>
-                <th>Ponto de Parada:</th>
+                <th className="col-meio">Ponto de Parada:</th>
                 {horarioSelecionado && <th>Previsto: {horarioSelecionado}</th>}
               </tr>
             </thead>

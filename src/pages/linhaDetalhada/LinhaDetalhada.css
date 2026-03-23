@@ -223,6 +223,13 @@ details[open] .main-chevron {
   text-align: center;
   font-weight: bold;
   cursor: pointer;
+  transition: transform 0.3s ease;
+}
+
+.card-horario:hover {
+  background: #ebebeb;
+
+  transform: scale(1.04); 
 }
 
 /* TABELA */
@@ -236,6 +243,16 @@ details[open] .main-chevron {
   background: #e4e4e4;
   text-align: start;
 }
+
+.tabela tbody tr {
+  transition: transform 0.3s ease;
+}
+
+.tabela tbody tr:hover {
+  background: #f1f1f1;
+  transform: scale(1.01); 
+}
+
 
 .tabela td {
   padding: 10px;

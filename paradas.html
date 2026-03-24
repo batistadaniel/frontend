@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Mapa - Paradas DF</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
+
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+    }
+
+    #map {
+      height: 100vh;
+      width: 100%;
+    }
+
+    /* Remove estilos padrão do Leaflet que podem deslocar o ícone */
+    .leaflet-div-icon {
+      background: transparent !important;
+      border: none !important;
+    }
+
+    /* ===== ÍCONE ===== */
+    .icon {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      /* O scale encolhe o ícone mantendo a base como âncora */
+      transform: scale(0.45);
+      transform-origin: bottom center;
+    }
+
+    .placa-azul {
+      display: flex;
+      background-color: #385EA9;
+      width: 100px;
+      height: 115px;
+      justify-content: center;
+      align-items: center;
+      border-radius: 8px;
+    }
+
+    .borda {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      border: 2px solid #ffffff;
+      border-radius: 4px;
+      height: 90%;
+      width: 90%;
+    }
+
+    .info-placa {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-top: 10px;
+      background-color: #ffffff;
+      width: 72px;
+      height: 60px;
+      font-size: 40px;
+      font-weight: bold;
+      border-radius: 2px;
+    }
+
+    .poste {
+      width: 10px;
+      height: 30px;
+      background-color: #000;
+    }
+  </style>
+</head>
+<body>
+
+<div id="map"></div>
+
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
+<script>
+  const map = L.map('map').setView([-15.793889, -47.882778], 12);
+
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '&copy; OpenStreetMap'
+  }).addTo(map);
+
+  function criarIcone(numero) {
+    // Calculamos o tamanho real antes do scale: 100px largura, 145px altura (115 placa + 30 poste)
+    return L.divIcon({
+      className: "custom-stop-icon",
+      html: `
+        <div class="icon">
+          <div class="placa-azul">
+            <div class="borda">
+              <div class="info-placa">${numero}</div>
+            </div>
+          </div>
+          <div class="poste"></div>
+        </div>
+      `,
+      iconSize: [100, 145], 
+      iconAnchor: [50, 145] // [Meio da largura, Base total do poste]
+    });
+  }
+
+  async function carregarDados() {
+    try {
+      const resParadas = await fetch("src/json/paradas_df_v2026.json");
+      const paradasDF = await resParadas.json();
+
+      const mapaParadas = {};
+      paradasDF.forEach(p => {
+        mapaParadas[p.nome.trim().toLowerCase()] = p;
+      });
+
+      const resAPI = await fetch("http://localhost:3000/linha/870.1");
+      const dataAPI = await resAPI.json();
+
+      const itinerario = dataAPI.itinerarios.find(i => i.sentido === "Ida");
+
+      if (!itinerario) return;
+
+      const pontos = [];
+
+      itinerario.paradas.forEach(paradaAPI => {
+        const nome = paradaAPI.nome.trim().toLowerCase();
+        const paradaReal = mapaParadas[nome];
+
+        if (paradaReal) {
+          const lat = paradaReal.lat;
+          const lon = paradaReal.lon;
+
+          pontos.push([lat, lon]);
+
+          L.marker([lat, lon], {
+            icon: criarIcone(paradaAPI.id)
+          })
+          .addTo(map)
+          .bindPopup(paradaReal.nome);
+        }
+      });
+
+      if (pontos.length > 0) {
+        map.setView(pontos[0], 14);
+      }
+
+    } catch (erro) {
+      console.error("Erro:", erro);
+    }
+  }
+
+  carregarDados();
+</script>
+
+</body>
+</html>

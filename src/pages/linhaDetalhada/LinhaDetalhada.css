@@ -50,14 +50,21 @@
   padding: 12px;
 }
 
+/* .aba:hover {
+  background: #181818;
+  cursor: pointer;
+} */
+
 .aba.ativa {
   border-bottom: 3px solid #fff;
+  text-underline-offset: 8px;
+  text-decoration: underline;
 }
 
 /* SELEÇÕES */
 .selecoes {
   margin-top: 20px;
-  max-width: 700px;
+  max-width: 100%;
 }
 
 /* LABEL + DROPDOWN */
@@ -174,6 +181,12 @@ details[open] .main-chevron {
   line-height: 1.6;
 }
 
+.spam-previto {
+  margin-top: 25px;
+  font-size: 18px;
+  font-weight: bold;
+  text-align: center;
+}
 /* MODO */
 .modo {
   margin-top: 25px;

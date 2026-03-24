@@ -199,6 +199,8 @@ function LinhaDetalhada(){
           <p><b>Local de desembarque:</b> {formatarNome(desembarque)}</p>
         </div>
 
+        <h2 className="spam-previto">Horarios previstos:</h2>
+
       </div>
 
       {/* MODO */}

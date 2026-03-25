@@ -1,0 +1,16 @@
+.bus-icon-container {
+  width: 140px;
+  height: 140px;
+  background-color: #27ae60;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15);
+}
+
+.bus-icon-container svg {
+  fill: white;
+  width: 110px;
+  height: 110px;
+}

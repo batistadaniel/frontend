@@ -2,6 +2,7 @@ import { useParams, Link } from "react-router-dom"
 import { useEffect, useState, useRef } from "react"
 import "./LinhaDetalhada.css"
 import Loader from "../../components/Loader/Loader"
+import BusIcon from "../../components/BusIcon/BusIcon"
 import L from "leaflet"
 import "leaflet/dist/leaflet.css"
 import polyline from "@mapbox/polyline"
@@ -16,6 +17,10 @@ function LinhaDetalhada() {
   const [mapaEstilo, setMapaEstilo] = useState(() => {
     return localStorage.getItem("map_style") || "Padrão"
   })
+  const [veiculos, setVeiculos] = useState([])
+  const [proximaAtualizacao, setProximaAtualizacao] = useState(15)
+  const [veiculosMarkers, setVeiculosMarkers] = useState({})
+  const [mapaCriado, setMapaCriado] = useState(false)
 
   const dropdownRef = useRef(null)
   const mapRef = useRef(null)
@@ -23,26 +28,69 @@ function LinhaDetalhada() {
   const markersRef = useRef([])
   const layersRef = useRef({})
   const layerControlRef = useRef(null)
+  const linhaRef = useRef(null)
 
+  // Carregamento inicial
   useEffect(() => {
     async function carregar() {
       const response = await fetch(`http://localhost:3000/linha/${id}`)
       const data = await response.json()
       setLinha(data)
+      linhaRef.current = data
+      
+      // Extrai veículos do sentido selecionado
+      if (data.viagens[sentidoSelecionado]) {
+        setVeiculos(data.viagens[sentidoSelecionado].veiculos_operando || [])
+      }
     }
     carregar()
   }, [id])
 
-  // useEffect PARA CRIAR O MAPA (sem redimensionamento ao trocar de mapa)
+  // Atualiza veículos quando muda o sentido
   useEffect(() => {
-    if (modo === "mapa" && linha && mapRef.current) {
+    if (linhaRef.current && linhaRef.current.viagens[sentidoSelecionado]) {
+      setVeiculos(linhaRef.current.viagens[sentidoSelecionado].veiculos_operando || [])
+    }
+  }, [sentidoSelecionado])
+
+  // Timer de atualização (15 segundos) - SEM recriar o mapa
+  useEffect(() => {
+    if (modo !== "mapa") return
+
+    setProximaAtualizacao(15)
+
+    const interval = setInterval(async () => {
+      setProximaAtualizacao(prev => {
+        if (prev <= 1) {
+          // Faz requisição para atualizar veículos APENAS
+          fetch(`http://localhost:3000/linha/${id}`)
+            .then(res => res.json())
+            .then(data => {
+              linhaRef.current = data
+              if (data.viagens[sentidoSelecionado]) {
+                setVeiculos(data.viagens[sentidoSelecionado].veiculos_operando || [])
+              }
+            })
+            .catch(err => console.error("Erro ao atualizar veículos:", err))
+          
+          return 15
+        }
+        return prev - 1
+      })
+    }, 1000)
+
+    return () => clearInterval(interval)
+  }, [modo, id, sentidoSelecionado])
+
+  // useEffect PARA CRIAR O MAPA - SÓ EXECUTA UMA VEZ
+  useEffect(() => {
+    if (modo === "mapa" && linha && mapRef.current && !mapaCriado) {
       if (mapInstance.current) {
         mapInstance.current.remove()
       }
       markersRef.current = []
       layersRef.current = {}
 
-      // Tiles com melhor nitidez
       const tiles = {
         "Ruas": L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
           maxZoom: 20,
@@ -63,7 +111,6 @@ function LinhaDetalhada() {
         })
       }
 
-      // Armazena referências das layers
       layersRef.current = tiles
 
       const map = L.map(mapRef.current, {
@@ -77,13 +124,11 @@ function LinhaDetalhada() {
 
       L.control.zoom({ position: 'topleft' }).addTo(map)
 
-      // Adiciona controle de camadas base (compacto)
       layerControlRef.current = L.control.layers(tiles, null, { 
         position: 'topright',
         collapsed: true
       }).addTo(map)
 
-      // Event listener para salvar o mapa escolhido (SEM redimensionar)
       map.on('baselayerchange', (e) => {
         localStorage.setItem("map_style", e.name)
         setMapaEstilo(e.name)
@@ -91,7 +136,6 @@ function LinhaDetalhada() {
 
       const viagemAtual = linha.viagens[sentidoSelecionado]
 
-      // Desenhar Itinerário com BORDA PRETA
       if (viagemAtual?.shape) {
         const decoded = polyline.decode(viagemAtual.shape)
         const latlngs = decoded.map(coord => [coord[0], coord[1]])
@@ -105,12 +149,19 @@ function LinhaDetalhada() {
         map.fitBounds(poly.getBounds())
       }
 
-      // Redimensiona SÓ quando o mapa é criado
       setTimeout(() => map.invalidateSize(), 200)
+      setMapaCriado(true)
     }
-  }, [modo, linha, sentidoSelecionado])
 
-  // useEffect SEPARADO para gerenciar APENAS os MARKERS (paradas)
+    // Cleanup
+    return () => {
+      if (modo !== "mapa") {
+        setMapaCriado(false)
+      }
+    }
+  }, [modo, linha, sentidoSelecionado, mapaCriado])
+
+  // useEffect para MARKERS de PARADAS
   useEffect(() => {
     if (
       mapInstance.current &&
@@ -119,7 +170,6 @@ function LinhaDetalhada() {
       linha.viagens &&
       linha.itinerarios
     ) {
-      // Remove markers antigos
       markersRef.current.forEach(marker => marker.remove())
       markersRef.current = []
 
@@ -128,7 +178,6 @@ function LinhaDetalhada() {
         it => it.sentido === viagemAtual.sentido
       )
 
-      // Adiciona markers apenas se mostrarParadas for true
       if (itinerarioAtual && mostrarParadas) {
         const carregarMarkers = (mapaParadasLocal = null) => {
           itinerarioAtual.paradas.forEach(pAPI => {
@@ -164,14 +213,56 @@ function LinhaDetalhada() {
       }
     }
 
-    // Cleanup
     return () => {
       if (markersRef.current && mapInstance.current) {
         markersRef.current.forEach(marker => marker.remove())
         markersRef.current = []
       }
     }
-  }, [mostrarParadas, modo, linha, sentidoSelecionado])
+  }, [mostrarParadas, modo, sentidoSelecionado])
+
+  // useEffect para MARKERS dos VEÍCULOS - ATUALIZA POSIÇÕES SEM RECRIAR
+  useEffect(() => {
+    if (!mapInstance.current || modo !== "mapa") {
+      return
+    }
+
+    if (!veiculos.length) {
+      // Remove todos os marcadores de veículos
+      Object.values(veiculosMarkers).forEach(marker => marker.remove())
+      setVeiculosMarkers({})
+      return
+    }
+
+    const novosMarcadores = { ...veiculosMarkers }
+
+    veiculos.forEach(veiculo => {
+      const { lat, lng } = veiculo.localizacao
+      const prefixo = veiculo.prefixo
+
+      // Se o marker já existe, atualiza a posição
+      if (novosMarcadores[prefixo]) {
+        novosMarcadores[prefixo].setLatLng([lat, lng])
+      } else {
+        // Se não existe, cria novo marker
+        const marker = L.marker([lat, lng], { icon: criarIconeVeiculo() })
+          .addTo(mapInstance.current)
+          .bindPopup(`<strong>Prefixo:</strong> ${veiculo.prefixo}<br/><strong>Status:</strong> ${veiculo.status}`)
+        
+        novosMarcadores[prefixo] = marker
+      }
+    })
+
+    // Remove markers de veículos que não estão mais em operação
+    Object.keys(veiculosMarkers).forEach(prefixoAntigo => {
+      if (!veiculos.find(v => v.prefixo === prefixoAntigo)) {
+        veiculosMarkers[prefixoAntigo].remove()
+        delete novosMarcadores[prefixoAntigo]
+      }
+    })
+
+    setVeiculosMarkers(novosMarcadores)
+  }, [veiculos, modo])
 
   function criarIcone(numero) {
     return L.divIcon({
@@ -191,7 +282,22 @@ function LinhaDetalhada() {
     })
   }
 
-  // fechar ao clicar fora
+  function criarIconeVeiculo() {
+    return L.divIcon({
+      className: "veiculo-marker",
+      html: `
+        <div class="veiculo-icon-circle">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640">
+            <path d="M192 64C139 64 96 107 96 160L96 448C96 477.8 116.4 502.9 144 510L144 544C144 561.7 158.3 576 176 576L192 576C209.7 576 224 561.7 224 544L224 512L416 512L416 544C416 561.7 430.3 576 448 576L464 576C481.7 576 496 561.7 496 544L496 510C523.6 502.9 544 477.8 544 448L544 160C544 107 501 64 448 64L192 64zM160 192C160 174.3 174.3 160 192 160L448 160C465.7 160 480 174.3 480 192L480 288C480 305.7 465.7 320 448 320L192 320C174.3 320 160 305.7 160 288L160 192zM192 384C209.7 384 224 398.3 224 416C224 433.7 209.7 448 192 448C174.3 448 160 433.7 160 416C160 398.3 174.3 384 192 384zM448 384C465.7 384 480 398.3 480 416C480 433.7 465.7 448 448 448C430.3 448 416 433.7 416 416C416 398.3 430.3 384 448 384z"/>
+          </svg>
+        </div>
+      `,
+      iconSize: [50, 50],
+      iconAnchor: [25, 25],
+      popupAnchor: [0, -25]
+    })
+  }
+
   useEffect(() => {
     function handleClickOutside(event) {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
@@ -234,6 +340,18 @@ function LinhaDetalhada() {
     data.setHours(h); data.setMinutes(m); data.setSeconds(0)
     data.setSeconds(data.getSeconds() + segundos)
     return `${String(data.getHours()).padStart(2, "0")}:${String(data.getMinutes()).padStart(2, "0")}`
+  }
+
+  function formatarDelay(atrasoSegundos, status) {
+    const minutosTotais = Math.floor(atrasoSegundos / 60)
+    const horas = Math.floor(minutosTotais / 60)
+    const minutos = minutosTotais % 60
+
+    if (minutosTotais < 60) {
+      return `${Math.abs(minutosTotais)} min`
+    } else {
+      return `${Math.abs(horas)}h ${Math.abs(minutos)} min`
+    }
   }
 
   return (
@@ -344,20 +462,72 @@ function LinhaDetalhada() {
           </div>
         </>
       ) : (
-        <div className="mapa-wrapper">
-          <div className="map-controls">
-            <div className="map-controls-group">
-              <label>
-                <input
-                  type="checkbox"
-                  checked={mostrarParadas}
-                  onChange={e => setMostrarParadas(e.target.checked)}
-                />
-                Mostrar paradas
-              </label>
+        <div className="mapa-container">
+          <div className="mapa-wrapper">
+            <div className="map-controls">
+              <div className="map-controls-group">
+                <label>
+                  <input
+                    type="checkbox"
+                    checked={mostrarParadas}
+                    onChange={e => setMostrarParadas(e.target.checked)}
+                  />
+                  Mostrar paradas
+                </label>
+              </div>
+            </div>
+            <div id="map-container" ref={mapRef}></div>
+          </div>
+
+          <div className="veiculos-panel">
+            <div className="veiculos-header">
+              <h3>Veículos</h3>
+              <div className="atualizacao-timer">
+                Atualiza em: <span className="timer-valor">{proximaAtualizacao}s</span>
+              </div>
+            </div>
+
+            <div className="veiculos-separator"></div>
+
+            <div className="veiculos-lista">
+              {veiculos.length > 0 ? (
+                veiculos.map((veiculo) => (
+                  <div key={veiculo.prefixo} className="veiculo-card">
+                    <div className="veiculo-row">
+                      <span className="veiculo-label">Sentido:</span>
+                      <span className="veiculo-valor">{ formatarNome(viagem.sentido)}</span>
+                    </div>
+                    <div className="veiculo-row">
+                      <span className="veiculo-label">Prefixo:</span>
+                      <span className="veiculo-valor">{veiculo.prefixo}</span>
+                    </div>
+                    <div className="veiculo-row">
+                      <span className="veiculo-label">Horário de saída:</span>
+                      <span className="veiculo-valor">{veiculo.horario_inicio}</span>
+                    </div>
+                    <div className="veiculo-row">
+                      <span className="veiculo-label">Último sinal:</span>
+                      <span className="veiculo-valor">{veiculo.ultima_atualizacao}</span>
+                    </div>
+                    <div className="veiculo-row">
+                      <span className="veiculo-label">Progresso:</span>
+                      <span className="veiculo-valor">{veiculo.progresso_percentual}%</span>
+                    </div>
+                    <div className="veiculo-row">
+                      <span className="veiculo-label">Situação:</span>
+                      <span className="veiculo-valor">{veiculo.status} {formatarDelay(veiculo.atraso_segundos, veiculo.status)}</span>
+                    </div>
+                    <div className="veiculo-row">
+                      <span className="veiculo-label">Parada atual:</span>
+                      <span className="veiculo-valor">{veiculo.sequencia_parada}</span>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <div className="sem-veiculos">Nenhum veículo em operação</div>
+              )}
             </div>
           </div>
-          <div id="map-container" ref={mapRef}></div>
         </div>
       )}
     </div>

@@ -289,21 +289,153 @@ details[open] .main-chevron {
   background: #f9f9f9;
 }
 
-/* WRAPPER DO MAPA */
-.mapa-wrapper {
+/* MAPA COM PAINEL LATERAL */
+.mapa-container {
+  display: flex;
+  height: 74dvh;
+  position: fixed;
   width: 100vw;
   left: 50%;
   transform: translateX(-50%);
-  height: 74dvh;
-  position: fixed;
   background: #eee;
   border-bottom: 2px solid #000;
   z-index: 1;
 }
 
+.mapa-wrapper {
+  flex: 1;
+  position: relative;
+}
+
 #map-container {
   width: 100%;
   height: 100%;
+}
+
+/* PAINEL DE VEÍCULOS - LADO DIREITO */
+.veiculos-panel {
+  width: 250px;
+  background: #fff;
+  border-left: 1px solid #ddd;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.veiculos-header {
+  padding: 12px 15px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+}
+
+.veiculos-header h3 {
+  margin: 0;
+  font-size: 20px;
+  font-weight: bold;
+  color: #333;
+}
+
+.atualizacao-timer {
+  font-size: 16px;
+  color: #000000;
+  text-align: right;
+  white-space: nowrap;
+}
+
+.timer-valor {
+  font-weight: bold;
+  color: #037726;
+  font-size: 18px;
+}
+
+.veiculos-separator {
+  height: 1px;
+  background-color: #e0e0e0;
+}
+
+.veiculos-lista {
+  flex: 1;
+  overflow-y: auto;
+  padding: 0;
+}
+
+.veiculo-card {
+  padding: 12px 12px;
+  border-bottom: 1px solid #f0f0f0;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.veiculo-card:hover {
+  background: #f9f9f9;
+}
+
+.veiculo-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 14px;
+  line-height: 1.5;
+  margin-bottom: 3px;
+}
+
+.veiculo-label {
+  font-weight: 600;
+  color: #333;
+  flex: 0 0 auto;
+}
+
+.veiculo-valor {
+  color: #555;
+  text-align: right;
+  flex: 1;
+  margin-left: 8px;
+}
+
+.sem-veiculos {
+  padding: 20px 15px;
+  text-align: center;
+  color: #999;
+  font-size: 13px;
+}
+
+/* MARKER DO VEÍCULO NO MAPA */
+.veiculo-icon-circle {
+  width: 50px;
+  height: 50px;
+  background-color: #27ae60;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  transform: scale(0.8);
+  z-index: 9999999999999999999999999;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2);
+}
+
+.veiculo-icon-circle svg {
+  fill: white;
+  width: 35px;
+  height: 35px;
+}
+
+/* Scroll customizado para a lista de veículos */
+.veiculos-lista::-webkit-scrollbar {
+  width: 5px;
+}
+
+.veiculos-lista::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+.veiculos-lista::-webkit-scrollbar-thumb {
+  background: #bbb;
+  border-radius: 3px;
+}
+
+.veiculos-lista::-webkit-scrollbar-thumb:hover {
+  background: #999;
 }
 
 /* CONTROLES DO MAPA */
@@ -351,7 +483,7 @@ details[open] .main-chevron {
   border: none !important;
 }
 
-.leaflet-top {
+.leaflet-right {
   margin-top: 60px;
   margin-right: 8px;
 }

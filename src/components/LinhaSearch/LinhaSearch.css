@@ -40,7 +40,7 @@
   display:flex;
   flex-direction:column;
   gap:10px;
-
+  margin-bottom:80px;
   margin-top:80px; /* espaço para não ficar atrás do input */
 }
 

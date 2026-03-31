@@ -406,23 +406,21 @@ details[open] .main-chevron {
 
 /* MARKER DO VEÍCULO NO MAPA */
 .veiculo-icon-circle {
-  width: 50px;
-  height: 50px;
+  width: 35px;
+  height: 35px;
   background-color: #27ae60;
   border-radius: 50%;
-  border: 3px ridge #000;
+  border: 2px solid #000;
   display: flex;
   justify-content: center;
   align-items: center;
-  transform: scale(0.8);
-  z-index: 9999999999999999999999999;
   box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2);
 }
 
 .veiculo-icon-circle svg {
   fill: white;
-  width: 35px;
-  height: 35px;
+  width: 24px;
+  height: 24px;
 }
 
 /* Scroll customizado para a lista de veículos */
@@ -498,26 +496,24 @@ details[open] .main-chevron {
   display: flex;
   flex-direction: column;
   align-items: center;
-  transform: scale(0.32);
-  transform-origin: bottom center;
 }
 
 .placa-azul-map {
   display: flex;
   background-color: #385EA9;
-  width: 100px;
-  height: 115px;
+  width: 32px;
+  height: 37px;
   justify-content: center;
   align-items: center;
-  border-radius: 12px;
+  border-radius: 4px;
 }
 
 .borda-map {
   display: flex;
-  flex-direction: column;
   align-items: center;
-  border: 2px solid #ffffff;
-  border-radius: 4px;
+  justify-content: center;
+  border: 1px solid #ffffff;
+  border-radius: 2px;
   height: 90%;
   width: 90%;
 }
@@ -526,18 +522,20 @@ details[open] .main-chevron {
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-top: 10px;
   background-color: #ffffff;
-  width: 72px;
-  height: 60px;
-  font-size: 40px;
+  width: 23px;
+  height: 19px;
+  margin-bottom: 3px;
+  font-size: 12px;
   font-weight: bold;
   border-radius: 2px;
   color: #000;
+  text-align: center;
 }
 
+
 .poste-map {
-  width: 10px;
-  height: 30px;
+  width: 4px;
+  height: 10px;
   background-color: #000;
 }

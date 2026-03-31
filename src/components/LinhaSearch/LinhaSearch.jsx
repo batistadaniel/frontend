@@ -1,6 +1,7 @@
 import { useState, useRef } from "react"
 import { useNavigate } from "react-router-dom"
 import "./LinhaSearch.css"
+import Loader from "../Loader/Loader"
 
 function LinhaSearch({ linhas }) {
 
@@ -9,6 +10,10 @@ function LinhaSearch({ linhas }) {
 
   const navigate = useNavigate()
   const itensRef = useRef([])
+
+  if (!linhas || linhas.length === 0) {
+    return <Loader />
+  }
 
   function slug(texto) {
     return texto
